@@ -1,0 +1,316 @@
+server:
+  address: ":8000"
+  openapiPath: "/api.json"
+  swaggerPath: "/swagger"# https://goframe.org/docs/web/server-config-file-template
+
+
+# https://goframe.org/docs/core/glog-config
+logger:
+  path: "./logs"               # 日志输出路径（自动创建）
+  level: "all"                 # 日志级别：all, debug, info, warn, error
+  stdout: true                 # 控制台输出
+  file: "{Y}-{M}-{D}.log"      # 日志文件名模板（按天切割）
+  rotateExpire: "7d"           # 日志文件保留7天
+  rotateBackupLimit: 7         # 最多保留7个文件
+  rotateCheckInterval: "1h"    # 每1小时检测一次是否需要切割
+
+# https://goframe.org/docs/core/gdb-config-file
+database:
+  default:
+    link: "pgsql:postgres:aioednnaskjdhfiak@tcp(47.120.39.13:5432)/kg?sslmode=disable"
+    debug: true
+
+# Redis配置
+redis:
+  host: "localhost"
+  port: 6379
+  password: ""
+  db: 0
+
+# 阿里云SMS配置
+aliyun:
+  sms:
+    accessKeyId: "LTAI5tM37fRqPKMuWCSRCWNC"
+    accessKeySecret: "bZKXUlQotgul0t0t4cp4Jwuof7MYz0"
+    signName: "南京尺牍科技文化"
+    templateCode: "SMS_325940806"
+
+# 邮箱配置
+email:
+  host: "smtp.qq.com"  # SMTP服务器地址
+  port: 587            # SMTP端口
+  username: "2410831777@qq.com"          # 邮箱账号
+  password: "wuipiilaiwgeecce"          # 邮箱密码或授权码
+  from: "2410831777@qq.com"              # 发件人邮箱
+
+# 文件上传配置
+upload:
+  path: "./resource/public/uploads"      # 文件上传路径
+  maxSize: 10485760                      # 最大文件大小（10MB）
+  allowedTypes: # 允许的文件类型
+    - "image/jpeg"
+    - "image/png"
+    - "image/gif"
+    - "application/pdf"
+    - "text/plain"
+    - "application/msword"
+    - "application/vnd.openxmlformats-officedocument.wordprocessingml.document" # docx
+    - "application/json"
+    - "jsonl"
+    - "docx"
+    - "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" # xlsx
+  # 云存储配置（可选）
+  cloudStorage:
+    enabled: true                            # 是否启用云存储
+    provider: "minio"                         # 云存储提供商：minio, aliyun, aws, qcloud
+    endpoint: "47.120.39.13:9000"                    # MinIO服务端点
+    bucket: "uploads"                         # 存储桶名称
+    region: "us-east-1"                       # 存储区域
+    accessKey: "minioadmin"                   # 访问密钥
+    secretKey: "minioadmin123"                   # 秘密密钥
+    useSSL: false                             # 是否使用SSL
+    domain: ""                                # 自定义域名
+
+# Python 算法服务配置
+python:
+  baseUrl: "http://localhost:8001"       # Python 服务地址
+  timeout: 30                            # 请求超时时间（秒）
+  retryCount: 3                          # 重试次数
+  retryInterval: 5                       # 重试间隔（秒）
+
+# Neo4j 配置
+neo4j:
+  uri: "neo4j://localhost:7688"
+  user: "neo4j"
+  password: "password"
+
+# 文件下载配置
+download:
+  path: "./resource/public/downloads"
+  cleanup:
+    enabled: true                    # 是否启用自动清理
+    cron: "0 0 3 * * *"             # 清理时间（每天凌晨3点）
+    maxAge: 86400                   # 文件最大保留时间（秒），默认24小时
+
+
+# pdf ocr
+tika:
+  url: http://127.0.0.1:9998
+
+# 支付宝配置
+alipay:
+  appId: "9021000156612338" # APPID
+  privateKey: "MIIEowIBAAKCAQEAlKCm2OfWFnSMBCAjq9TD1O8LIKxpq0qvWVkx7q0Lx41K0yxBD7imWtCjkbCzo3Qn+issSUKHVKR/PH9KvYekmgFGmYLWIklRP1HiZXvd/iTHAW7MrcDlQoD9wKu/VxDzwGFhiQt4+eygj6tmMyiFH7TKY/gT3+liHK55ewp54jETNlDhDQQF/Ova+OZczrAvOd8N86oiRbavsmfKti9XoUf+AJUnkaQR7tFlzbcZCdesDlmt8JZ2wixucB/FT/+/xG/I/xARJEPKgkI4fkXQqn3AeNtZSIPBOf9yo3bhGAOYRRhcD5hEZf61qQJis2Uz6pfyt2ZK+k4jCfSnWKjNMwIDAQABAoIBAG7IuNUhKfEe+mbw1eX09+u2KqM2IKWvS7jbxV5U2lzqMoXpjK19Q3KZ5fJotd32bP4KRD5vOpSa8MRVVY6klsq8fLVcUuTHpan/DTP7+mK/Yx7sSeCR0dGaeIqu+jaZyjbx31PZm1kfSicM6WbkoyYZCmsttRLH0XvziVVvX557NzzSpDXOcQ3OKN/TxpcQnTWt3Iz+kORCdcVpLznzbIg/DSwZGokJH5h4Jiz+thKgTSF9+sgNZpDUDAEhLt1+1mGSPO4IVasjZMszWthVFxfzrH9DaRhhg6Fp5hd7OaDYpC1gU0KoyukTcx7i+lbBHpZvC31T3s8hgUdPT1z1OnECgYEAxA829DI2POsJfE4dxgG/h+T2Y27huTKbJVThMt1/XaDfzUoANs8SlGdYz4pHWmBgNqvflpMksPmzFTnyU3xXvv/mxdKjcrSTk3lDCeDwsXwQROEnJ8zcALd5oBJteTBE9PWm1rqUrd2fpHaAUX4TSX29h8GRoYhV/6Bl5DC9ddUCgYEAwhEiMyjKP7F5GtrN6/ccCzb1dlbmwPQ718zUZAhXZggaLsoF0XZ88bQUbTFPYlZ3Em8ce8NRxUoPBjIIAZzqS991M1fUiktgWYEWi0zepZh16D6wTY1q4L6nsy3Tmct0cpVxn086aq480GQf+p98S0sl5HHAbscFf+HrS86AkucCgYBKgWGn0QENi2ASbfkgiv+HG/qJ9NQwtcuBl0zxMH07TmxeLjYAnhZ4cQGt9OWCscc+X3hbV1WFL47fjSLKmSEbQ1ImcRKN/5NpYpaYRXQSbowcMNfZZx9f4lmE/BvABxjdYhDh3wurOuJ09Fd1II0hy3fgBC5cjVvpBcJSwjbtdQKBgHrC/eBg8DeEW7iKKvMWmS3a8UGPzV7H4MctMjmpMShA/dcVQsLy8iyvnrBIHhB149LMaLc9og9sPr7LjVb/3RJr46a7654j+moEB6/My5bzL7rfVQVp7O8Ii+sDlTRXiG0nbf25z5lGaP/mJniSxLyYZ/rvniw1R5xS3FZS5fCHAoGBAJxKeQEk8zywVJw9pj8faznx5TO5+fgfi5c3+XaMYwG92yc/JLLCPN6A7OzdxMZWa2XmaujKQvi7HxLCbT9JGc3TkF2Qi7JGTMRMfmuFyLZt2GOrJ00soM7ftUjrcZL7/syVykVbvpw16Pits21xWG5HibPntPYUCyxLYTHDtpGn"
+  alipayPublicKey: "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuzjj6c6Bn8Xog9yUcMx5AYJIRykhK9ynBZp96ddPI57BRWYgCZQOKFRE9dj1NlvkUS79+5hLqvTWtUjRVBJEql1zw5/kNwitioOD8vIqEkTYD8ACXHiHlhbmG7Af+83G4BdI8uQ91US3Rv8+KzNkVd4HoVob1RFnuFXRV93u4brXDsPAWmb2nfoz85k42chBGaxEyzVq+zs5t7FE18PmV0MZsKH/KZ8NjhUWCbhGquEUEGW9ui5ZGR8L3lH0YIpi8KhVkl5kGsG3tpyQpx5bysq5vEDqjwbbf9P/5EAjr2DrS/w3u6Qg9UuW1EhdojhSbbNnESwULVycbpPkp/WqwwIDAQAB"
+  notifyUrl: "http://381b129b.r2.cpolar.top/v1/alipay/notify" # 回调地址
+  returnUrl: "http://381b129b.r2.cpolar.top/pay/result" # 支付成功跳转地址
+  isSandbox: true  # 开发时使用沙箱环境
+
+
+# 套餐配置（固定配置）
+plans:
+  free:
+    plan_price: 0.00                   # 月费
+    words_quota: 20000                 # 月度字数配额
+    storage_quota: 800                 # 存储配额(MB)
+    cu_quota: 50                       # 月度CU配额
+    traffic_quota: 5                   # 月度流量配额(GB)
+    single_upload_limit: 5000          # 单次上传字数限制，“-1”表示无限制
+    allowed_file_types: [ "txt", "docx" ] # 允许的文件类型
+    allowed_export_formats: [ "csv" ]    # 允许的导出格式
+    has_advanced_visualization: false  # 高级可视化权限
+    has_graph_algorithms: false        # 图算法权限
+    has_sso: false                     # SSO集成权限
+
+  professional:
+    plan_price: 88.00
+    words_quota: 100000
+    storage_quota: 102400               # 100GB
+    cu_quota: 500
+    traffic_quota: 50
+    single_upload_limit: -1              # -1表示无限制
+    allowed_file_types: [ "txt", "docx", "pdf", "image" ]
+    allowed_export_formats: [ "csv", "json-ld", "rdf-xml" ]
+    has_advanced_visualization: true
+    has_graph_algorithms: true
+    has_sso: false
+
+  team:
+    plan_price: 158.00                 # 月费（每人）
+    words_quota: 3000000               # 团队基础配额（团队共享）
+    storage_quota: 512000               # 500GB（团队共享）
+    cu_quota: 2000
+    traffic_quota: 200
+    single_upload_limit: -1
+    allowed_file_types: [ "txt", "docx", "pdf", "image" ]
+    allowed_export_formats: [ "csv", "json-ld", "rdf-xml" ]
+    has_advanced_visualization: true
+    has_graph_algorithms: true
+    has_sso: true
+
+# 团队配置（固定规则）
+team:
+  min_member_count: 3                  # 最少成员数
+  max_member_count: 100                # 最大成员数限制
+  member_quota_multiplier: 1.0         # 每增加1名成员，配额倍增系数，用于控制总价格、总字数
+
+# 超额费用规则（固定费率）
+overage_fees:
+  words:
+    unit: 1000  # 每千字
+    price: 1.0
+  storage:
+    unit: 1  # 每GB
+    price: 0.8
+  traffic:
+    unit: 1  # 每GB
+    price: 0.8
+
+# CU换算规则（固定系数）
+cu_calculation:
+  # 算法复杂度等级
+  algorithm_levels:
+    basic:
+      multiplier: 1.0
+      examples: [ "节点度计算", "简单查询" ]
+    standard:
+      multiplier: 2.0
+      examples: [ "BFS", "DFS", "PageRank" ]
+    advanced:
+      multiplier: 4.0
+      examples: [ "社区发现", "中心性计算" ]
+    complex:
+      multiplier: 8.0
+      examples: [ "图神经网络", "子图匹配" ]
+
+  # 数据规模系数
+  scale_multipliers:
+    - max_nodes: 10000
+      multiplier: 1.0
+    - max_nodes: 100000
+      multiplier: 1.5
+    - max_nodes: 1000000
+      multiplier: 2.5
+    - max_nodes: 999999999
+      multiplier: 4.0
+
+# AI模型成本配置（固定系数）
+ai_models:
+  # 中文场景
+  chinese:
+    - name: "qwen-max"
+      display_name: "Qwen Max"
+      level: "high"
+      level_display: "精度较高"
+      cost_multiplier: 1.8
+      effective_words: 55556
+      advantages: "中文原生优化，领域知识丰富"
+      use_cases:
+        - "学术论文"
+        - "法律合同"
+        - "深度分析"
+        - "中英混合"
+      tags: [ "中文", "学术", "法律" ]
+      enabled: true
+
+    - name: "deepseek-r1"
+      display_name: "DeepSeek R1"
+      level: "high"
+      level_display: "精度较高"
+      cost_multiplier: 2.0
+      effective_words: 50000
+      advantages: "推理能力强，专业术语准确"
+      use_cases:
+        - "技术文档"
+        - "复杂推理"
+        - "专业术语"
+      tags: [ "中文", "技术", "推理" ]
+      enabled: true
+
+    - name: "gpt-4o"
+      display_name: "GPT-4o"
+      level: "balanced"
+      level_display: "平衡选择"
+      cost_multiplier: 1.0
+      effective_words: 100000
+      advantages: "稳定性好，性价比高"
+      use_cases:
+        - "日常多语言内容"
+        - "商务沟通"
+      tags: [ "通用", "性价比" ]
+      enabled: true
+
+  # 英文场景
+  english:
+    - name: "claude-3.7-sonnet"
+      display_name: "Claude 3.7 Sonnet"
+      level: "high"
+      level_display: "精度较高"
+      cost_multiplier: 3.0
+      effective_words: 33333
+      advantages: "思维链推理强，语义理解深"
+      use_cases:
+        - "学术研究"
+        - "法律文档"
+        - "深度分析"
+      tags: [ "英文", "学术", "推理" ]
+      enabled: true
+
+    - name: "gpt-4.1"
+      display_name: "GPT-4.1"
+      level: "high"
+      level_display: "精度较高"
+      cost_multiplier: 2.8
+      effective_words: 35714
+      advantages: "结构化输出优，关系识别准"
+      use_cases:
+        - "技术文档"
+        - "结构化输出"
+        - "关系抽取"
+      tags: [ "英文", "技术", "结构化" ]
+      enabled: true
+
+    - name: "gemini-2.5-pro"
+      display_name: "Gemini 2.5 Pro"
+      level: "balanced"
+      level_display: "平衡选择"
+      cost_multiplier: 2.7
+      effective_words: 37037
+      advantages: "超长上下文，多文档关联"
+      use_cases:
+        - "长文档"
+        - "系列报告"
+        - "历史档案"
+      tags: [ "英文", "长文本", "关联分析" ]
+      enabled: true
+
+    - name: "gpt-4o"
+      display_name: "GPT-4o"
+      level: "balanced"
+      level_display: "平衡选择"
+      cost_multiplier: 1.0
+      effective_words: 100000
+      advantages: "稳定性好，性价比高"
+      use_cases:
+        - "日常多语言内容"
+        - "商务沟通"
+      tags: [ "通用", "性价比" ]
+      enabled: true
+
+    - name: "claude-3.5-haiku"
+      display_name: "Claude 3.5 Haiku"
+      level: "economy"
+      level_display: "经济批量"
+      cost_multiplier: 0.7
+      effective_words: 142857
+      advantages: "成本最优，基础任务可靠"
+      use_cases:
+        - "简单多语言内容"
+        - "初步处理"
+      tags: [ "经济", "批量处理" ]
+      enabled: true
+
+# 用量监控阈值（固定比例）
+usage_monitor:
+  warning_threshold: 80                # 80%预警
+  limit_threshold: 100                 # 100%限制
