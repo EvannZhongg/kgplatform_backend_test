@@ -1,0 +1,65 @@
+# https://goframe.org/docs/web/server-config-file-template
+server:
+  address:     ":8000"
+  openapiPath: "/api.json"
+  swaggerPath: "/swagger"
+
+# https://goframe.org/docs/core/glog-config
+logger:
+  level : "all"
+  stdout: true
+
+# https://goframe.org/docs/core/gdb-config-file
+database:
+  default:
+    link: "pgsql:postgres:12345678@tcp(localhost:5432)/kg?sslmode=disable"
+    debug: true
+
+# Redis配置
+redis:
+  host: "localhost"
+  port: 6379
+  password: ""
+  db: 0
+
+# 阿里云SMS配置
+aliyun:
+  sms:
+    accessKeyId: "LTAI5tM37fRqPKMuWCSRCWNC"
+    accessKeySecret: "bZKXUlQotgul0t0t4cp4Jwuof7MYz0"
+    signName: "南京尺牍科技文化"
+    templateCode: "SMS_325940806"
+# 邮箱配置
+email:
+  host: "smtp.qq.com"  # SMTP服务器地址
+  port: 587            # SMTP端口
+  username: "2410831777@qq.com"          # 邮箱账号
+  password: "wuipiilaiwgeecce"          # 邮箱密码或授权码
+  from: "2410831777@qq.com"              # 发件人邮箱
+
+# 文件上传配置
+upload:
+  path: "/app/uploads"                        # 生产环境文件上传路径
+  maxSize: 52428800                           # 最大文件大小（50MB）
+  allowedTypes:                               # 允许的文件类型
+    - "image/jpeg"
+    - "image/png"
+    - "image/gif"
+    - "image/webp"
+    - "application/pdf"
+    - "text/plain"
+    - "application/msword"
+    - "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    - "application/vnd.ms-excel"
+    - "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  # 云存储配置（可选）
+  cloudStorage:
+    enabled: true                            # 是否启用云存储
+    provider: "minio"                         # 云存储提供商：minio, aliyun, aws, qcloud
+    endpoint: "localhost:9000"                # MinIO服务端点
+    bucket: "uploads"                         # 存储桶名称
+    region: "us-east-1"                       # 存储区域
+    accessKey: "minioadmin"                   # 访问密钥
+    secretKey: "minioadmin123"                # 秘密密钥
+    useSSL: false                             # 是否使用SSL
+    domain: ""                                # 自定义域名

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>SSE 流量提醒测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        #messages {
+            border: 1px solid #ccc;
+            padding: 10px;
+            max-width: 600px;
+            height: 300px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+        }
+
+        .msg {
+            margin-bottom: 10px;
+            padding: 5px 10px;
+            background-color: #e1f5fe;
+            border-radius: 4px;
+        }
+
+        .login-panel {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            max-width: 600px;
+        }
+
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        .form-group label {
+            display: inline-block;
+            width: 100px;
+        }
+
+        .form-group input {
+            padding: 5px;
+            width: 300px;
+        }
+
+        button {
+            padding: 5px 15px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<h1>SSE 流量提醒测试</h1>
+<div class="login-panel">
+    <h3>用户登录</h3>
+    <div class="form-group">
+        <label for="loginUsername">用户名:</label>
+        <input type="text" id="loginUsername" value="testuser"/>
+    </div>
+    <div class="form-group">
+        <label for="loginPassword">密码:</label>
+        <input type="password" id="loginPassword" value="123456"/>
+    </div>
+    <button id="loginBtn">登录获取Token</button>
+    <div id="tokenStatus"></div>
+</div>
+
+<div id="sse-panel">
+    <button id="connectBtn">连接 SSE</button>
+    <div id="messages"></div>
+</div>
+
+<script>
+    let evtSource;
+    let jwtToken = null;
+
+    // 登录获取JWT Token
+    document.getElementById('loginBtn').addEventListener('click', async function () {
+        const username = document.getElementById('loginUsername').value;
+        const password = document.getElementById('loginPassword').value;
+        const tokenStatus = document.getElementById('tokenStatus');
+
+        if (!username || !password) {
+            alert("请输入用户名和密码");
+            return;
+        }
+
+        try {
+            const response = await fetch('http://localhost:8000/v1/users/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                })
+            });
+
+            const data = await response.json();
+            if (response.ok && data.code === 0 && data.data && data.data.token) {
+                jwtToken = data.data.token;
+                tokenStatus.textContent = '✅ 登录成功，已获取Token';
+                tokenStatus.style.color = 'green';
+                document.getElementById('connectBtn').disabled = false;
+            } else {
+                tokenStatus.textContent = '❌ 登录失败: ' + (data.message || '未知错误');
+                tokenStatus.style.color = 'red';
+                jwtToken = null;
+                document.getElementById('connectBtn').disabled = true;
+            }
+        } catch (error) {
+            tokenStatus.textContent = '❌ 登录请求出错: ' + error.message;
+            tokenStatus.style.color = 'red';
+            jwtToken = null;
+            document.getElementById('connectBtn').disabled = true;
+        }
+    });
+
+    // 连接SSE
+    document.getElementById('connectBtn').addEventListener('click', function () {
+        if (!jwtToken) {
+            alert("请先登录获取Token");
+            return;
+        }
+
+        // 如果已连接，先关闭
+        if (evtSource) {
+            evtSource.close();
+        }
+
+        const url = 'http://localhost:8000/v1/usage/stream';
+        // 创建SSE连接时添加Authorization头
+        evtSource = new EventSource(url, {
+            headers: {
+                'Authorization': jwtToken
+            }
+        });
+
+        const messagesDiv = document.getElementById('messages');
+        messagesDiv.innerHTML = '';
+
+        evtSource.onopen = function () {
+            const div = document.createElement('div');
+            div.className = 'msg';
+            div.textContent = '✅ SSE 连接已建立';
+            messagesDiv.appendChild(div);
+        };
+
+        evtSource.onmessage = function (event) {
+            const div = document.createElement('div');
+            div.className = 'msg';
+            div.textContent = `📢 消息: ${event.data}`;
+            messagesDiv.appendChild(div);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        };
+
+        evtSource.onerror = function (err) {
+            const div = document.createElement('div');
+            div.className = 'msg';
+            div.style.backgroundColor = '#ffcdd2';
+            div.textContent = '⚠ SSE 连接出错或已断开';
+            messagesDiv.appendChild(div);
+            evtSource.close();
+        };
+    });
+
+    // 初始状态禁用连接按钮
+    document.getElementById('connectBtn').disabled = true;
+</script>
+</body>
+</html>

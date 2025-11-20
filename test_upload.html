@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件上传测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .upload-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .upload-form {
+            margin-bottom: 20px;
+        }
+        .file-input {
+            margin: 10px 0;
+            padding: 10px;
+            border: 2px dashed #ccc;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .upload-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .upload-btn:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .file-info {
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="upload-container">
+        <h1>文件上传测试</h1>
+        <div class="upload-form">
+            <div class="file-input">
+                <input type="file" id="fileInput" accept="image/*,.pdf,.txt,.doc,.docx">
+                <p>选择文件或将文件拖拽到此处</p>
+                <p style="font-size: 12px; color: #666;">
+                    支持的文件类型: 图片(jpg, png, gif), PDF, 文本文件, Word文档<br>
+                    最大文件大小: 10MB
+                </p>
+            </div>
+            <button class="upload-btn" onclick="uploadFile()">上传文件</button>
+        </div>
+        
+        <div id="result" class="result">
+            <div id="resultContent"></div>
+        </div>
+    </div>
+
+    <script>
+        async function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const resultDiv = document.getElementById('result');
+            const resultContent = document.getElementById('resultContent');
+            
+            if (!fileInput.files[0]) {
+                showResult('请选择要上传的文件', 'error');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            
+            try {
+                showResult('正在上传文件...', 'info');
+                
+                console.log('开始上传文件:', fileInput.files[0].name);
+                
+                const response = await fetch('http://localhost:8000/v1/upload/file', {
+                    method: 'POST',
+                    body: formData,
+                    // 不设置Content-TripleType，让浏览器自动设置multipart/form-data
+                });
+                
+                console.log('响应状态:', response.status);
+                console.log('响应头:', response.headers);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP错误: ${response.status} ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                console.log('响应数据:', result);
+                
+                if (result.code === 0) {
+                    const fileInfo = result.data;
+                    const successMessage = `
+                        <h3>上传成功！</h3>
+                        <div class="file-info">
+                            <p><strong>文件名:</strong> ${fileInfo.fileName}</p>
+                            <p><strong>文件大小:</strong> ${formatFileSize(fileInfo.fileSize)}</p>
+                            <p><strong>文件类型:</strong> ${fileInfo.fileType}</p>
+                            <p><strong>访问地址:</strong> <a href="${fileInfo.fileUrl}" target="_blank">${fileInfo.fileUrl}</a></p>
+                        </div>
+                    `;
+                    showResult(successMessage, 'success');
+                } else {
+                    showResult(`上传失败: ${result.message || '未知错误'}`, 'error');
+                }
+            } catch (error) {
+                console.error('上传错误:', error);
+                showResult(`上传失败: ${error.message}`, 'error');
+            }
+        }
+        
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            const resultContent = document.getElementById('resultContent');
+            
+            resultContent.innerHTML = message;
+            resultDiv.className = `result ${type}`;
+            resultDiv.style.display = 'block';
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // 拖拽上传功能
+        const fileInput = document.getElementById('fileInput');
+        const fileInputContainer = fileInput.parentElement;
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            fileInputContainer.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            fileInputContainer.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            fileInputContainer.addEventListener(eventName, unhighlight, false);
+        });
+        
+        function highlight(e) {
+            fileInputContainer.style.backgroundColor = '#e3f2fd';
+        }
+        
+        function unhighlight(e) {
+            fileInputContainer.style.backgroundColor = '';
+        }
+        
+        fileInputContainer.addEventListener('drop', handleDrop, false);
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            
+            if (files.length > 0) {
+                fileInput.files = files;
+            }
+        }
+    </script>
+</body>
+</html>
