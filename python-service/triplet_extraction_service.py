@@ -485,28 +485,52 @@ if __name__ == "__main__":
     # 测试代码
     service = TripletsExtractionService()
 
-    # 模拟创建任务
+    # 导入读取函数
+    from pathlib import Path
+
+    # 定义 prompt 文件路径
+    prompt_file = Path("triple_extraction_prompt.txt")
+
+    # 确保文件存在
+    if not prompt_file.exists():
+        print(f"错误：找不到 {prompt_file}，请确保文件在当前目录下")
+        exit(1)
+
+    # === 修复：读取完整的 Prompt 内容 ===
+    prompt_text = prompt_file.read_text(encoding="utf-8")
+
     try:
-        prompt_text = "请从以下文档中抽取知识图谱三元组..." # 后续考虑替换
+        print("正在创建任务...")
         task_id = service.create_task(
-            files=[r"partydata/【回顾】 南师附小弹性离校 _ 放学别走！哥哥姐姐今天要来给我们上课啦！.txt"],
-            prompt_text=prompt_text,
+            # 请替换为你本地实际存在的测试文件路径
+            files=[r"D:\Personal_Project\kgplatform_backend\python-service\txt_test\【回顾】南师附小弹性离校 _ 放学别走！一起 “识天文知地理”！.txt"],
+            prompt_text=prompt_text,  # 传入包含 JSON 约束的完整 Prompt
             provider="deepseek",
-            api_key="sk-1bc317ee3858458d9648944a2184e4df"
+            api_key="sk-1bc317ee3858458d9648944a2184e4df"  # 确保 key 正确
         )
 
         print(f"任务创建成功，ID: {task_id}")
 
         # 监控任务状态
         import time
+
         while True:
             status = service.get_task_status(task_id)
-            print(f"任务状态: {status['status']}")
+            print(f"任务状态: {status['status']} | 已处理: {status['processed_files']}/{status['total_files']}")
+
             if status['status'] in ['completed', 'failed', 'cancelled']:
                 break
             time.sleep(2)
 
         print("最终结果:", status)
+
+        # 打印部分结果以验证
+        if status['results']:
+            print("\n--- 抽取结果预览 ---")
+            res_file = status['results'][0]['output_files']['txt']
+            if os.path.exists(res_file):
+                with open(res_file, 'r', encoding='utf-8') as f:
+                    print(f.read()[:500] + "...")
 
     except Exception as e:
         print(f"测试失败: {e}")

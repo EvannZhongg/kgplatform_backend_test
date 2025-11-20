@@ -745,3 +745,12 @@ python-service/
 ---
 
 **最后更新**: 2025年1月
+
+
+### 开发步骤（仅供参考）
+```
+cd python-service
+pip install -r requirements.txt
+```
+
+1. 修改了`extract_triplets_from_docx.py`
